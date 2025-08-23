@@ -110,6 +110,30 @@ class MovementOrderController extends Controller
     
         return redirect()->route('movementOrder.index');
     }
+
+    public function addDownTime(Request $request)
+    {
+        $data = $request->validate([
+            'completion_date' => ['required', 'date'],
+            'engraver_id' => ['required', 'integer'],
+            'note' => ['nullable', 'string'],
+        ]);
+
+        $priority = MovementOrder::where('engraver_id', $data['engraver_id'])
+            ->whereDate('completion_date', $data['completion_date'])
+            ->max('priority_number') ?? 0;
+
+        MovementOrder::create([
+            'completion_date' => $data['completion_date'],
+            'engraver_id' => $data['engraver_id'],
+            'note' => $data['note'] ?? null,
+            'priority_number' => $priority + 1,
+            'status' => MovementOrder::STATUS_IN_PROGRESS,
+            'type' => 'downtime',
+        ]);
+
+        return back();
+    }
     
 
     public function update(Request $request)
