@@ -109,8 +109,8 @@ Route::middleware(['auth'])->prefix('movement-order')->group(function () {
     Route::post('/update', [MovementOrderController::class, 'update'])->name('movementOrder.update');
     Route::get('/getOrders', [MovementOrderController::class, 'getOrders'])->name('movementOrder.getOrders');
     Route::post('/redistributeOrders', [MovementOrderController::class, 'redistributeOrders'])->name('movementOrder.redistributeOrders');
-    Route::post('/addDownTime', [MovementOrderController::class, 'addDownTime'])->name('movementOrder.addDownTime');
     Route::post('/split', [MovementOrderController::class, 'splitOrder'])->name('movementOrder.split');
+    Route::post('/addDownTime', [MovementOrderController::class, 'addDownTime'])->name('movementOrder.addDownTime');
 });
 
 Route::middleware(['auth'])->prefix('machine')->group(function () {
@@ -215,6 +215,14 @@ Route::middleware(['auth'])->prefix('mobile/electro-plating')->group(function ()
     Route::post('/infoshaft', [MobileElectroPlatingController::class, 'infoShaft'])->name('mobileElectroPlating.infoShaft');
 });
 
+Route::middleware(['auth'])->prefix('statistic')->group(function () {
+    Route::get('/', [App\Http\Controllers\StatisticController::class, 'index'])->name('statistic.index');
+    Route::get('/getData', [App\Http\Controllers\StatisticController::class, 'getData'])->name('statistic.getData');
+    Route::get('/getWorkCenters', [App\Http\Controllers\StatisticController::class, 'getWorkCenters'])->name('statistic.getWorkCenters');
+    Route::get('/getOperations', [App\Http\Controllers\StatisticController::class, 'getOperations'])->name('statistic.getOperations');
+    Route::get('/getOperatorData', [App\Http\Controllers\StatisticController::class, 'getOperatorData'])->name('statistic.getOperatorData');
+    Route::get('/getShiftData', [App\Http\Controllers\StatisticController::class, 'getShiftData'])->name('statistic.getShiftData');
+});
 
 
 

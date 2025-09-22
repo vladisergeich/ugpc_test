@@ -362,12 +362,7 @@ const showRedistribute = ref(false);
 const orders = ref([]);
 const loading = ref(false);
 
-
-const showDownTime = ref(false);
-const downTime = ref({
-    completion_date: null,
-    note: '',
-});
+const selectedDownTine = ref(null);
 
 const dates = ref([new Date(filters.value.start_date),new Date(filters.value.end_date)] || null); 
 
@@ -484,6 +479,30 @@ const fetchOrders = () => {
     });
 };
 
+const addDownTime = () => {
+    const url = routeZiggy('movementOrder.addDownTime', {}, undefined, Ziggy);
+
+    const payload = {
+        ...downTime.value,
+        engraver_id: selectedEngraver.value,
+    };
+
+    if (payload.completion_date) {
+        payload.completion_date = payload.completion_date.toLocaleDateString('sv-SE');
+    }
+
+    router.post(url, payload, {
+        onSuccess: () => {
+            showDownTime.value = false;
+            downTime.value = { completion_date: null, note: '' };
+            toast.add({ severity: 'success', summary: 'Простой добавлен', life: 3000 });
+        },
+        onError: () => {
+            toast.add({ severity: 'error', summary: 'Ошибка добавления простоя', life: 3000 });
+        },
+    });
+};
+
 const getOrders = async () => {
   try {
     const url = routeZiggy(
@@ -511,29 +530,19 @@ const addOrder = (order) => {
     update([order]);
 }
 
-const addDownTime = () => {
+function sendToNav() {
+
     const url = routeZiggy('movementOrder.addDownTime', {}, undefined, Ziggy);
 
-    const payload = {
-        ...downTime.value,
-        engraver_id: selectedEngraver.value,
-    };
-
-    if (payload.completion_date) {
-        payload.completion_date = payload.completion_date.toLocaleDateString('sv-SE');
-    }
-
-    router.post(url, payload, {
+    router.post(url, selectedDownTine.value, {
         onSuccess: () => {
-            showDownTime.value = false;
-            downTime.value = { completion_date: null, note: '' };
-            toast.add({ severity: 'success', summary: 'Простой добавлен', life: 3000 });
+            toast.add({ severity: 'success', summary: 'Профиль обновлен', life: 3000 });
         },
         onError: () => {
-            toast.add({ severity: 'error', summary: 'Ошибка добавления простоя', life: 3000 });
+            toast.add({ severity: 'error', summary: 'Ошибка обновлении профиля', life: 3000 });
         },
     });
-};
+}
 
 
 const redistributeOrders = async () => {
