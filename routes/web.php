@@ -109,6 +109,7 @@ Route::middleware(['auth'])->prefix('movement-order')->group(function () {
     Route::post('/update', [MovementOrderController::class, 'update'])->name('movementOrder.update');
     Route::get('/getOrders', [MovementOrderController::class, 'getOrders'])->name('movementOrder.getOrders');
     Route::post('/redistributeOrders', [MovementOrderController::class, 'redistributeOrders'])->name('movementOrder.redistributeOrders');
+    Route::post('/addDownTime', [MovementOrderController::class, 'addDownTime'])->name('movementOrder.addDownTime');
     Route::post('/split', [MovementOrderController::class, 'splitOrder'])->name('movementOrder.split');
     Route::post('/addDownTime', [MovementOrderController::class, 'addDownTime'])->name('movementOrder.addDownTime');
 });
