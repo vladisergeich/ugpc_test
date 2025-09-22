@@ -83,6 +83,41 @@ return [
             ]) : [],
         ],
 
+        'danaflex-ugpc' => [ // Старая база
+            'driver' => 'pgsql',
+            'host' => env('DB_UGPC_HOST', '127.0.0.1'),
+            'database' => env('DB_UGPC_DATABASE', 'ugpc'),
+            'username' => env('DB_UGPC_USERNAME', 'root'),
+            'password' => env('DB_UGPC_PASSWORD', ''),
+            'port' => env('DB_UGPC_PORT', '3306'),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'strict' => false,
+            'engine' => null,
+        ],
+
+        'global' => [
+            'driver' => 'mysql',
+            'url' => env('GLOBAL_DATABASE_URL'),
+            'host' => env('GLOBAL_DB_HOST', '127.0.0.1'),
+            'port' => env('GLOBAL_DB_PORT', '3306'),
+            'database' => env('GLOBAL_DB_DATABASE', 'forge'),
+            'username' => env('GLOBAL_DB_USERNAME', 'forge'),
+            'password' => env('GLOBAL_DB_PASSWORD', ''),
+            'unix_socket' => env('GLOBAL_DB_SOCKET', ''),
+            'charset' => 'utf8',
+            'collation' => 'utf8_unicode_ci',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'strict' => false,
+            'engine' => null,
+            'options' => extension_loaded('pdo_mysql') ? array_filter([
+                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+            ]) : [],
+        ],
+
+        
         'global' => [
             'driver' => 'mysql',
             'url' => env('GLOBAL_DATABASE_URL'),
@@ -119,34 +154,6 @@ return [
             'sslmode' => 'prefer',
         ],
 
-        'old_mysql' => [ // Старая база
-            'driver' => 'mysql',
-            'host' => env('DB_OLD_HOST', '127.0.0.1'),
-            'database' => env('DB_OLD_DATABASE', 'old_db'),
-            'username' => env('DB_OLD_USERNAME', 'root'),
-            'password' => env('DB_OLD_PASSWORD', ''),
-            'port' => env('DB_OLD_PORT', '3306'),
-            'charset' => 'utf8mb4',
-            'collation' => 'utf8mb4_unicode_ci',
-            'prefix' => '',
-            'strict' => false,
-            'engine' => null,
-        ],
-
-        'mdm' => [ // Старая база
-            'driver' => 'mysql',
-            'host' => env('DB_MDM_HOST', '127.0.0.1'),
-            'database' => env('DB_MDM_DATABASE', 'mdm'),
-            'username' => env('DB_MDM_USERNAME', 'root'),
-            'password' => env('DB_MDM_PASSWORD', ''),
-            'port' => env('DB_MDM_PORT', '3306'),
-            'charset' => 'utf8mb4',
-            'collation' => 'utf8mb4_unicode_ci',
-            'prefix' => '',
-            'strict' => false,
-            'engine' => null,
-        ],
-
         'sqlsrv' => [
             'driver' => 'sqlsrv',
             'url' => env('DATABASE_URL'),
@@ -157,6 +164,69 @@ return [
             'password' => env('DB_PASSWORD', ''),
             'charset' => 'utf8',
             'prefix' => '',
+            'prefix_indexes' => true,
+        ],
+
+        'access' => [
+            'driver' => 'pdo_access',
+            'connection_string' => 'dsn={Access}',
+            'database' => 'C:\База ОКВиД-6-0_ядро.mdb',            
+            'username' => '',
+            'password' => '',
+            'table_prefix' => '',
+        ],
+
+        
+
+        'danaflexNano' => [
+            'driver' => 'sqlsrv',
+            'url' => env('DATABASE_URL'),
+            'host' => '10.10.40.78',
+            'port' => '1433',
+            'database' => 'DANAFLEXNANO',
+            'username' => 'datacollector',
+            'password' => 'Rjkktrnjh123',
+            'charset' => 'utf8',
+            'prefix' => 'ООО _ДАНАФЛЕКС-НАНО_$',
+            'prefix_indexes' => true,
+        ],
+
+        'danaflexZAO' => [
+            'driver' => 'sqlsrv',
+            'url' => env('DATABASE_URL'),
+            'host' => '10.10.40.107',
+            'port' => '1433',
+            'database' => 'DANAFLEX11',
+            'username' => 'datacollector',
+            'password' => 'Rjkktrnjh123',
+            'charset' => 'utf8',
+            'prefix' => 'ЗАО _ДАНАФЛЕКС_$',
+            'prefix_indexes' => true,
+        ],
+
+        'danaflexAlabuga' => [
+            'driver' => 'sqlsrv',
+            'url' => env('DATABASE_URL'),
+            'host' => '10.5.252.10',
+            'port' => '1433',
+            'database' => 'danaflex-alabuga',
+            'username' => 'datacollector',
+            'password' => 'Rjkktrnjh123',
+            'charset' => 'utf8',
+            'prefix' => 'ООО _ДАНАФЛЕКС-АЛАБУГА_$',
+            'prefix_indexes' => true,
+        ],
+
+        'dgpack' => [
+            'driver' => 'sqlsrv',
+            'url' => env('DATABASE_URL'),
+            'host' => '10.15.56.1',
+            'port' => '1433',
+            'database' => 'dgpack',
+            'username' => 'datacollector',
+            'password' => 'Rjkktrnjh123',
+            'charset' => 'utf8',
+            'prefix' => 'DGPack s_r_o_$',
             'prefix_indexes' => true,
         ],
 

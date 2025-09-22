@@ -5,40 +5,59 @@ namespace App\Mail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Content;
+use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
-use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\AppSteelExport;
-use App\Models\SteelShaftApplication;
-use App\Mail\AppSteelExcelFileMail;
+use Maatwebsite\Excel\Facades\Excel;
 
-class AppSteelExcelFileMail extends Mailable implements ShouldQueue
+class AppSteelExcelFileMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public function __construct(
-        public SteelShaftApplication $application,
-        public array $filePaths = []
-    ) {}
+    public $tempExcelFilePath;
+    public $otherFilePaths;
+    public $documentNumber;
 
-    public function build(): self
+    /**
+     * Create a new message instance.
+     *
+     * @return void
+     */
+    public function __construct($tempExcelFilePath, $otherFilePaths, $documentNumber)
     {
-        $email = $this
-            ->from('d.portal@danaflex.ru', 'UGPC-Portal')
-            ->subject('Заявка на изготовление стальных валов № ' . $this->application->id)
-            ->view('mail.mail_app_steel')
-            ->attachData(
-                Excel::raw(new AppSteelExport($this->application), \Maatwebsite\Excel\Excel::XLSX),
-                'Валы.xlsx'
-            );
+        $this->tempExcelFilePath = $tempExcelFilePath;
+        $this->otherFilePaths = $otherFilePaths;
+        $this->documentNumber = $documentNumber;
+    }
 
-        foreach ($this->filePaths as $path) {
-            $realPath = storage_path('app/public/' . $path);
-            if (file_exists($realPath)) {
-                $email->attach($realPath, ['as' => basename($path)]);
-            }
+    /**
+     * Build the message.
+     *
+     * @return $this
+     */
+    public function build()
+    {
+        $attachments = [];
+
+        foreach ($this->otherFilePaths as $filePath) {
+            $temporaryFilePath = tempnam(sys_get_temp_dir(), 'temp_file');
+            copy(storage_path('app/public/' . $filePath), $temporaryFilePath);
+            $attachments[] = [
+                'file' => $temporaryFilePath,
+                'options' => [
+                    'as' => basename($filePath), 
+                ],
+            ];
         }
 
-        return $email;
+        foreach ($attachments as $attachment) {
+            $this->attach($attachment['file'], ['as' => $attachment['options']['as']]);
+        }
+
+        return $this->view('ugpc.mail_app_steel') // Замените 'ugpc.mail_app_steel' на ваш шаблон
+                    ->subject("Заявка на изготовление стальных валов № " . $this->documentNumber)
+                    ->from('d.portal@danaflex.ru', 'UGPC-Portal')
+                    ->attachData(Excel::raw(new AppSteelExport($this->documentNumber), \Maatwebsite\Excel\Excel::XLSX), 'Валы.xlsx');
     }
 }
-

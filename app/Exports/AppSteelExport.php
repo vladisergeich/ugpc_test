@@ -1,39 +1,33 @@
 <?php
 
 namespace App\Exports;
-
-use Maatwebsite\Excel\Concerns\FromQuery;
-use Maatwebsite\Excel\Concerns\WithHeadings;
-use Maatwebsite\Excel\Concerns\Exportable;
-use App\Models\SteelShaftApplication;
 use Maatwebsite\Excel\Concerns\FromCollection;
-use Illuminate\Support\Collection;
+use App\Models\BDGP\SteelShaftApplicationComposition;
+use App\Models\BDGP\SteelShaftApplication;
+use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithMapping;
+use Maatwebsite\Excel\Concerns\FromQuery;
+use Maatwebsite\Excel\Concerns\Exportable;
 
-class AppSteelExport implements FromCollection, WithHeadings
+
+class AppSteelExport implements FromQuery, WithHeadings
 {
     use Exportable;
 
-    protected SteelShaftApplication $application;
+    protected $documentNumber;
 
-    public function __construct(SteelShaftApplication $application)
+    public function __construct($documentNumber)
     {
-        $this->application = $application;
+        $this->documentNumber = $documentNumber;
     }
 
-    public function collection(): Collection
+
+    public function query()
     {
-        return collect($this->application->shafts)->map(function ($shaft) {
-            return [
-                $this->application->id,
-                $shaft->sequence,
-                $shaft->shaft->code,
-                $shaft->ff,
-                $shaft->diameter,
-                $shaft->shaft_ra,
-                $shaft->shaft_rz,
-                $this->application->engraver->name,
-            ];
-        });
+        return SteelShaftApplicationComposition::query()
+            ->join('steel_shaft_applications','steel_shaft_applications.document_number','steel_shaft_application_compositions.document_number')
+            ->where('steel_shaft_application_compositions.document_number', $this->documentNumber)
+            ->select('steel_shaft_application_compositions.document_number','steel_shaft_application_compositions.shaft_number', 'steel_shaft_application_compositions.shaft_id', 'steel_shaft_application_compositions.ff', 'steel_shaft_application_compositions.diameter', 'steel_shaft_application_compositions.shaft_ra', 'steel_shaft_application_compositions.shaft_rz','steel_shaft_applications.engraver');
     }
 
     public function headings(): array
