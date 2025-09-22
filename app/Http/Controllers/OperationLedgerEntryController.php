@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\{OperationLedgerEntry,WorkShiftCode,MachineCenter, ShaftConsumption, OperationLedgerEntryParameter};
-use App\Services\EngravingOrderService;
+use App\Domain\Engraving\Services\EngravingStageService;
 
 class OperationLedgerEntryController extends Controller
 {
@@ -114,7 +114,7 @@ class OperationLedgerEntryController extends Controller
         );
 
         if ($operation->stage_id && ($operation->phaseStage->stage_id == 3 || ($operation->phaseStage->stage_id == 7 && $request->preCopper))) {
-            app(EngravingOrderService::class)->createStages($operation->phaseStage->engravingOrderShaft, $operation->phaseStage,$request->preCopper);
+            app(EngravingStageService::class)->createStages($operation->phaseStage->engravingOrderShaft, $operation->phaseStage,$request->preCopper);
         }
 
         if ($operation->status == 'completed' && $operation->phaseStage) {

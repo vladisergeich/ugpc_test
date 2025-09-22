@@ -2,13 +2,13 @@
 
 use Illuminate\Support\Facades\Route;
 
-use App\Http\Controllers\EngravingOrderController;
-use App\Http\Controllers\GravureDatabaseController;
-use App\Http\Controllers\MacroOrderController;
-use App\Http\Controllers\EngravingOrderShaftController;
-use App\Http\Controllers\OrderController;
+use App\Http\Controllers\Gravure\EngravingOrderController;
+use App\Http\Controllers\Gravure\GravureDirectoryController;
+use App\Http\Controllers\Gravure\MacroOrderController;
+use App\Http\Controllers\Gravure\EngravingOrderShaftController;
+use App\Http\Controllers\Gravure\OrderController;
 use App\Http\Controllers\RegisterController;
-use App\Http\Controllers\LayoutConstructorController;
+use App\Http\Controllers\Gravure\LayoutStreamController;
 use App\Http\Controllers\InputControlController;
 use App\Http\Controllers\MovementOrderController;
 use App\Http\Controllers\RouteMapController;
@@ -33,14 +33,14 @@ use Inertia\Inertia;
 
 
 Route::middleware(['auth'])->prefix('gravuredatabase')->group(function () {
-    Route::get('/getProfiles', [GravureDatabaseController::class, 'getProfiles'])->name('engravingOrders.getProfiles');
-    Route::get('/getVendors', [GravureDatabaseController::class, 'getVendors'])->name('engravingOrders.getVendors');
-    Route::get('/getDesigners', [GravureDatabaseController::class, 'getDesigners'])->name('engravingOrders.getDesigners');
-    Route::get('/getCustomers', [GravureDatabaseController::class, 'getCustomers'])->name('engravingOrders.getCustomers');
-    Route::get('/getEngravingOrderStatuses', [GravureDatabaseController::class, 'getEngravingOrderStatuses'])->name('engravingOrders.getEngravingOrderStatuses');
-    Route::get('/getEngravingOrderConditions', [GravureDatabaseController::class, 'getEngravingOrderConditions'])->name('engravingOrders.getEngravingOrderConditions');
-    Route::get('/getMountingParameters', [GravureDatabaseController::class, 'getMountingParameters'])->name('engravingOrders.getMountingParameters');
-    Route::get('/getMacro', [GravureDatabaseController::class, 'getMacro'])->name('gravuredatabase.getMacro');
+    Route::get('/getProfiles', [GravureDirectoryController::class, 'getProfiles'])->name('engravingOrders.getProfiles');
+    Route::get('/getVendors', [GravureDirectoryController::class, 'getVendors'])->name('engravingOrders.getVendors');
+    Route::get('/getDesigners', [GravureDirectoryController::class, 'getDesigners'])->name('engravingOrders.getDesigners');
+    Route::get('/getCustomers', [GravureDirectoryController::class, 'getCustomers'])->name('engravingOrders.getCustomers');
+    Route::get('/getEngravingOrderStatuses', [GravureDirectoryController::class, 'getEngravingOrderStatuses'])->name('engravingOrders.getEngravingOrderStatuses');
+    Route::get('/getEngravingOrderConditions', [GravureDirectoryController::class, 'getEngravingOrderConditions'])->name('engravingOrders.getEngravingOrderConditions');
+    Route::get('/getMountingParameters', [GravureDirectoryController::class, 'getMountingParameters'])->name('engravingOrders.getMountingParameters');
+    Route::get('/getMacro', [GravureDirectoryController::class, 'getMacro'])->name('gravuredatabase.getMacro');
 });
 
 Route::middleware(['auth'])->prefix('macro-orders')->group(function () {
@@ -85,9 +85,9 @@ Route::middleware(['auth'])->prefix('register')->group(function () {
 });
 
 Route::middleware(['auth'])->prefix('layout-constructor')->group(function () {
-    Route::post('/create', [LayoutConstructorController::class, 'create'])->name('layoutConstructor.create');
-    Route::post('/destroy', [LayoutConstructorController::class, 'destroy'])->name('layoutConstructor.destroy');
-    Route::post('/update', [LayoutConstructorController::class, 'update'])->name('layoutConstructor.update');
+    Route::post('/create', [LayoutStreamController::class, 'create'])->name('layoutConstructor.create');
+    Route::post('/destroy', [LayoutStreamController::class, 'destroy'])->name('layoutConstructor.destroy');
+    Route::post('/update', [LayoutStreamController::class, 'update'])->name('layoutConstructor.update');
 });
 
 Route::middleware(['auth'])->prefix('route-map')->group(function () {

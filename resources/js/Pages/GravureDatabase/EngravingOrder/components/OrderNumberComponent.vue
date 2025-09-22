@@ -67,7 +67,12 @@ const saveOrder = async () => {
   try {
     const url = routeZiggy('order.saveOrder', {}, undefined, Ziggy);
 
-    router.post(url, { engravingOrder: engravingOrder.value, orderNumber: orderNumber.value }, {
+    if (!engravingOrder.value?.id) {
+      toast.add({ severity: 'error', summary: 'Отсутствует идентификатор заказа', life: 3000 });
+      return;
+    }
+
+    router.post(url, { engraving_order_id: engravingOrder.value?.id, order_number: orderNumber.value }, {
       preserveScroll: true,
       preserveState: true,
 

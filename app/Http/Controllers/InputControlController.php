@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\{EngravingOrder,WorkShiftCode,Shaft,OperationLedgerEntry,EngravingOrderShaft};
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
-use App\Services\EngravingOrderService;
+use App\Domain\Engraving\Services\EngravingStageService;
 
 class InputControlController extends Controller
 {
@@ -72,7 +72,7 @@ class InputControlController extends Controller
         $newOperation->load('phaseStage.engravingOrderShaft');
 
         if ($engravingOrderShaft->parameters['confirmed']) {
-            app(EngravingOrderService::class)->createStages($engravingOrderShaft, $newOperation, false);
+            app(EngravingStageService::class)->createStages($engravingOrderShaft, $newOperation, false);
         }
 
         return redirect()->route('mobileInputControl.index')->with('success', 'Лот успешно учтён');

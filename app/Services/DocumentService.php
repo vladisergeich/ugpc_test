@@ -2,19 +2,24 @@
 
 namespace App\Services;
 
-use Spatie\ArrayToXml\ArrayToXml;
+use App\Support\ValueObjects\DocumentAttachment;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Spatie\ArrayToXml\ArrayToXml;
 
 class DocumentService
 {
-    public function generateXml(array $data): string
+    public function createXmlAttachment(array $data, string $filename, string $rootElement = 'root'): DocumentAttachment
     {
-        return ArrayToXml::convert($data);
+        $xml = ArrayToXml::convert($data, $rootElement);
+
+        return new DocumentAttachment($filename, $xml, 'application/xml');
     }
 
-    public function generatePdf(string $view, array $data): string
+    public function createPdfAttachment(string $view, array $data, string $filename): DocumentAttachment
     {
-        return Pdf::loadView($view, $data)->output();
+        $pdf = Pdf::loadView($view, $data)->output();
+
+        return new DocumentAttachment($filename, $pdf, 'application/pdf');
     }
 }
 

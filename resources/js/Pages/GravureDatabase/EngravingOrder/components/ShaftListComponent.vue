@@ -190,7 +190,37 @@ const props = defineProps({
   macroOrder: Object,
 });
 
-const { engravingOrder } = toRefs(props); 
+const { engravingOrder } = toRefs(props);
+
+const ensureEngravingOrderId = () => {
+  const id = engravingOrder.value?.id;
+  if (!id) {
+    toast.add({ severity: 'error', summary: 'Не удалось определить заказ', life: 3000 });
+    return null;
+  }
+
+  return id;
+};
+
+const buildSectionPayload = (section, overrides = {}) => ({
+  id: section.id,
+  engraving_order_id: engravingOrder.value?.id,
+  shaft_id: section.shaft_id,
+  status_id: section.status_id,
+  status: section.status,
+  color: section.color,
+  lineature: section.lineature,
+  corner: section.corner,
+  cutter: section.cutter,
+  engraving_time: section.engraving_time,
+  diameter: section.diameter,
+  note: section.note,
+  parameters: section.parameters,
+  sequence_number: section.sequence_number,
+  final_diameter: section.final_diameter,
+  write_off_date: section.write_off_date,
+  ...overrides,
+});
 
 const toast = useToast();
 const confirm = useConfirm();
@@ -268,7 +298,16 @@ const returnShaft = async () => {
   try {
     const url = routeZiggy('engravingOrderShafts.returnShaft', {}, undefined, Ziggy);
 
-    await router.post(url, selectedEngravingShaft.value, {
+    const id = ensureEngravingOrderId();
+    if (!id) {
+      return;
+    }
+
+    await router.post(url, {
+      id: selectedEngravingShaft.value.id,
+      engraving_order_id: id,
+      shaft_id: selectedEngravingShaft.value.shaft_id,
+    }, {
       preserveScroll: true,
       preserveState: true,
     });
@@ -282,7 +321,12 @@ const addSections = async () => {
   try {
     const url = routeZiggy('engravingOrderShafts.create', {}, undefined, Ziggy);
 
-    await router.post(url, { qty: qtySection.value, engravingOrder: engravingOrder.value }, {
+    const id = ensureEngravingOrderId();
+    if (!id) {
+      return;
+    }
+
+    await router.post(url, { quantity: qtySection.value, engraving_order_id: id }, {
       preserveScroll: true,
       preserveState: true,
     });
@@ -299,7 +343,12 @@ const deleteSection = async () => {
   try {
     const url = routeZiggy('engravingOrderShafts.destroy', {}, undefined, Ziggy);
 
-    await router.post(url, selectedEngravingShaft.value, {
+    const id = ensureEngravingOrderId();
+    if (!id) {
+      return;
+    }
+
+    await router.post(url, { id: selectedEngravingShaft.value.id, engraving_order_id: id }, {
       preserveScroll: true,
       preserveState: true,
     });
@@ -316,7 +365,12 @@ const updateEngravingOrderShaft = async (section) => {
   try {
     const url = routeZiggy('engravingOrderShafts.update', {}, undefined, Ziggy);
 
-    await router.post(url, section, {
+    const id = ensureEngravingOrderId();
+    if (!id) {
+      return;
+    }
+
+    await router.post(url, buildSectionPayload(section, { engraving_order_id: id }), {
       preserveScroll: true,
       preserveState: true,
     });

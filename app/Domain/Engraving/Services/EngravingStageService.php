@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Domain\Engraving\Services;
 
 use App\Models\{
     Phase,
@@ -11,7 +11,7 @@ use App\Models\{
 };
 use Illuminate\Support\Facades\Http;
 
-class EngravingOrderService
+class EngravingStageService
 {
     public function createStages(EngravingOrderShaft $shaft, $orderStage,$preCopper): void
     {
