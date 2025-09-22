@@ -1,38 +1,38 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Gravure;
 
-use Illuminate\Http\Request;
-use App\Services\OrderService;
+use App\Domain\Orders\Services\OrderService;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Gravure\SaveOrderRequest;
+use Illuminate\Http\RedirectResponse;
+use Throwable;
 
 class OrderController extends Controller
 {
-    protected $orderService;
-
-    public function __construct(OrderService $orderService)
+    public function __construct(private readonly OrderService $orderService)
     {
-        $this->orderService = $orderService;
     }
 
-    public function saveOrder(Request $request)
+    public function saveOrder(SaveOrderRequest $request): RedirectResponse
     {
         try {
-            $engravingOrder = $this->orderService->saveOrder($request);
-    
-            if (!$engravingOrder) {
+            $engravingOrder = $this->orderService->saveOrder($request->toData());
+
+            if (! $engravingOrder) {
                 return redirect()->back()->withErrors([
                     'orderNumber' => 'Заказ не найден',
                 ]);
             }
-    
+
             return redirect()->back()->with([
                 'message' => 'Партия загружена',
                 'engravingOrder' => $engravingOrder,
             ]);
-        } catch (\Exception $e) {
+        } catch (Throwable $exception) {
             return redirect()->back()->withErrors([
                 'error' => 'Ошибка при сохранении заказа',
-                'details' => $e->getMessage()
+                'details' => $exception->getMessage(),
             ]);
         }
     }

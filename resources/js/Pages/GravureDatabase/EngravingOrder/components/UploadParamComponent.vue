@@ -103,7 +103,12 @@ const sendApplication = async () => {
   try {
     const url = routeZiggy('engravingOrders.sendApplication', {}, undefined, Ziggy);
 
-    await router.post(url, engravingOrder.value, {
+    if (!engravingOrder.value?.id) {
+      toast.add({ severity: 'error', summary: 'Не удалось определить заказ', life: 3000 });
+      return;
+    }
+
+    await router.post(url, { engraving_order_id: engravingOrder.value.id }, {
       preserveScroll: true,
       preserveState: true,
     });

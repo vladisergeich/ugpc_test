@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\{MacroOrder,Phase, PhaseStage,EngravingOrder, EngravingOrderShaft,DefectLedgerEntry};
 use Inertia\Inertia;
-use App\Services\EngravingOrderService;
+use App\Domain\Engraving\Services\EngravingStageService;
 
 class RouteMapController extends Controller
 {
@@ -55,7 +55,7 @@ class RouteMapController extends Controller
         }, $selectedStageIds)]];
 
         if ($phase) {
-            app(EngravingOrderService::class)->updateOrCreateStages($phase->engravingOrderShaft, $stages ,$phase->sequence+1);
+            app(EngravingStageService::class)->updateOrCreateStages($phase->engravingOrderShaft, $stages ,$phase->sequence+1);
         }
 
         $phase = Phase::with('engravingOrderShaft','stages')->find($request->phase['id'])->update(['status' => 'completed']);

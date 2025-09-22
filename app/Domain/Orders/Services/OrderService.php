@@ -1,24 +1,24 @@
 <?php
 
-namespace App\Services;
+namespace App\Domain\Orders\Services;
 
-use App\Models\{Order, EngravingOrder, Profile, Item, OrderItem, ItemVariation};
-use Barryvdh\DomPDF\Facade\Pdf;
-use App\Services\SOAP\SoapClient;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
+use App\Domain\Orders\DataTransferObjects\SaveOrderData;
+use App\Models\EngravingOrder;
+use App\Models\Item;
+use App\Models\Order;
+use App\Models\OrderItem;
+use App\Models\Profile;
 use App\Services\NavisionService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class OrderService
 {
-    protected $navService;
+    private array $textOrientationMap;
+    private array $photometkaMap;
 
-    public function __construct(NavisionService $navService)
+    public function __construct(private readonly NavisionService $navService)
     {
-        $this->navService = $navService;
-
         $this->textOrientationMap = [
             0 => '40', 1 => '44', 2 => '46',
             3 => '42', 4 => '41', 5 => '47'
@@ -29,7 +29,7 @@ class OrderService
         ];
     }
 
-    private function getWindingOption($orderData): string
+    private function getWindingOption(object $orderData): string
     {
         $windingOption = $this->textOrientationMap[$orderData->text_orient] ?? '';
 
@@ -40,13 +40,15 @@ class OrderService
         return $windingOption;
     }
 
-    public function saveOrder($request)
+    public function saveOrder(SaveOrderData $data): ?EngravingOrder
     {
-        $orderData = $this->navService->getOrderData($request['orderNumber']);
-        
+        $orderData = $this->navService->getOrderData($data->orderNumber);
+
         if (!$orderData) {
             return null;
         }
+
+        $engravingOrder = EngravingOrder::findOrFail($data->engravingOrderId);
 
         // Запрашиваем только нужное поле ID (ускоряет запрос)
         $customerId = DB::connection('mdm')
@@ -82,16 +84,12 @@ class OrderService
             ]
         );
 
-        $itemsData = is_array($orderData->ProdOrderLine->Prod_Order_Line_List ?? []) 
-                    ? $orderData->ProdOrderLine->Prod_Order_Line_List 
-                    : [$orderData->ProdOrderLine->Prod_Order_Line_List];
-
-        // Готовим массив для batch insert
-        $itemsToInsert = [];
-        $orderItemsToInsert = [];
+        $itemsData = is_array($orderData->ProdOrderLine->Prod_Order_Line_List ?? [])
+            ? $orderData->ProdOrderLine->Prod_Order_Line_List
+            : [$orderData->ProdOrderLine->Prod_Order_Line_List];
 
         foreach ($itemsData as $itemData) {
-            
+
             if (!isset($itemData->Design_Count) && !isset($itemData->Print_Standard) ) {
                 continue;
             }
@@ -122,30 +120,31 @@ class OrderService
             }
         }
 
-        $profileId = Profile::where('code', $itemsData[0]->Print_Standard ?? null)->value('id');
-        
+        $firstItem = $itemsData[0] ?? null;
+        $profileCode = $firstItem->Print_Standard ?? null;
+        $profileId = $profileCode ? Profile::where('code', $profileCode)->value('id') : null;
+
         // Оптимизация floatval и preg_replace
         $format = isset($orderData->format) ? floatval(preg_replace('/\D/', '', $orderData->format)) : null;
         $printStep = $orderData->shagpechati ?? null;
-        
-        $engravingOrder = EngravingOrder::updateOrCreate(
-            [
-                'macro_order_id' => $request['engravingOrder']['macro_order_id'],
-                'sequence_number' => $request['engravingOrder']['sequence_number']
-            ],
-            [
-                'profile_id' => $profileId,
-                'order_id' => $order->id,
-                'format' => $format,
-                'material_width' => $orderData->Shirina1 ?? null,
-                'stream_width' => $orderData->ShirRuch ?? null,
-                'print_step' => $printStep,
-                'streams_quantity' => $orderData->KolvoRuch ?? null,
-                'fragments_in_circulation' => ($format && $printStep) ? $format / $printStep : null,
-            ]
-        );
 
-        return $engravingOrder;
+        $engravingOrder->update([
+            'profile_id' => $profileId,
+            'order_id' => $order->id,
+            'format' => $format,
+            'material_width' => $orderData->Shirina1 ?? null,
+            'stream_width' => $orderData->ShirRuch ?? null,
+            'print_step' => $printStep,
+            'streams_quantity' => $orderData->KolvoRuch ?? null,
+            'fragments_in_circulation' => ($format && $printStep) ? $format / $printStep : null,
+        ]);
+
+        return $engravingOrder->fresh()->load([
+            'order.items.item',
+            'profile.vendor',
+            'layoutStreams',
+            'engravingOrderShaft.shaft.warehouse',
+        ]);
     }
 
 }

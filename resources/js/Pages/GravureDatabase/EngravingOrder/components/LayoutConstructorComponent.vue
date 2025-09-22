@@ -68,7 +68,12 @@ const sendShaftInfo = async () => {
     try {
         const url = routeZiggy('engravingOrders.sendShaftInfo', {}, undefined, Ziggy);
 
-        await router.post(url, engravingOrder.value , {
+        if (!engravingOrder.value?.id) {
+            toast.add({ severity: 'error', summary: 'Не удалось определить заказ', life: 3000 });
+            return;
+        }
+
+        await router.post(url, { engraving_order_id: engravingOrder.value.id } , {
             preserveScroll: true,
             preserveState: true,
         });
@@ -85,7 +90,12 @@ const sendStreamInfo = async () => {
     try {
         const url = routeZiggy('engravingOrders.sendStreamInfo', {}, undefined, Ziggy);
 
-        await router.post(url, engravingOrder.value , {
+        if (!engravingOrder.value?.id) {
+            toast.add({ severity: 'error', summary: 'Не удалось определить заказ', life: 3000 });
+            return;
+        }
+
+        await router.post(url, { engraving_order_id: engravingOrder.value.id } , {
             preserveScroll: true,
             preserveState: true,
         });
@@ -102,7 +112,12 @@ const addStreams = async () => {
   try {
     const url = routeZiggy('layoutConstructor.create', {}, undefined, Ziggy);
 
-    await router.post(url, { qty: qtyStream.value, engravingOrder: engravingOrder.value }, {
+    if (!engravingOrder.value?.id) {
+      toast.add({ severity: 'error', summary: 'Не удалось определить заказ', life: 3000 });
+      return;
+    }
+
+    await router.post(url, { quantity: qtyStream.value, engraving_order_id: engravingOrder.value.id }, {
       preserveScroll: true,
       preserveState: true,
     });
@@ -120,7 +135,12 @@ const deleteStream = async (stream) => {
     try {
         const url = routeZiggy('layoutConstructor.destroy', {}, undefined, Ziggy);
 
-        await router.post(url, stream, {
+        if (!engravingOrder.value?.id) {
+          toast.add({ severity: 'error', summary: 'Не удалось определить заказ', life: 3000 });
+          return;
+        }
+
+        await router.post(url, { id: stream.id, engraving_order_id: engravingOrder.value.id }, {
         preserveScroll: true,
         preserveState: true,
         });
@@ -136,7 +156,17 @@ const updateStream = async (stream) => {
   try {
     const url = routeZiggy('layoutConstructor.update', {}, undefined, Ziggy);
 
-    await router.post(url, stream, {
+    if (!engravingOrder.value?.id) {
+      toast.add({ severity: 'error', summary: 'Не удалось определить заказ', life: 3000 });
+      return;
+    }
+
+    await router.post(url, {
+      id: stream.id,
+      engraving_order_id: engravingOrder.value.id,
+      item_id: stream.item_id,
+      stream_number: stream.stream_number,
+    }, {
       preserveScroll: true,
       preserveState: true,
     });
