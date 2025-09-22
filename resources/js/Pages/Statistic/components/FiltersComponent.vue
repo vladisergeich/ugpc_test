@@ -1,152 +1,98 @@
 <template>
-    <div class="filters-container">
-      <div class="filter-group">
-        <date-picker
-            type="date"
-            range
-            value-type="format"
-            format="YYYY-MM-DD"
-            ref="filters_datapicker"
-            v-model="filterDates"
-            @change="applyFilters"
-        ></date-picker>
-      </div>
-  
-      <div class="filter-group">
-        <label>Смена</label>
-        <a-checkbox-group
-            :options="letters"
-            v-model="filters.letters"
-            @change="onFilterChange"
-            style="display: flex; flex-direction: column"
-        />
-      </div>
-  
-      <div class="filter-group">
-        <label>Оператор</label>
-        <a-select
-            placeholder="Выбрать"
-            style="width: 100%"
-            v-model="filters.user"
-            :allowClear="true"
-            @change="onFilterChange"
-        >
-            <a-select-option v-for="user in this.users" :key="user.id">
-              {{ user.employer_name_1c ?? user.name }}
-            </a-select-option>
-        </a-select>
-      </div>
+    <div class="bg-white p-5 rounded-xl shadow-md">
+        <div class="space-y-6">
+            <div>
+                <Calendar 
+                    v-model="filterDates" 
+                    selection-mode="range" 
+                    date-format="yy-mm-dd"
+                    @update:model-value="applyFilters"
+                    placeholder="Выберите период"
+                    class="w-full"
+                />
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-3">Смена</label>
+                <div class="space-y-2">
+                    <div 
+                        v-for="letter in letters" 
+                        :key="letter"
+                        class="flex items-center"
+                    >
+                        <Checkbox 
+                            :input-id="letter" 
+                            v-model="filters.letters" 
+                            :value="letter"
+                            @change="onFilterChange"
+                        />
+                        <label :for="letter" class="ml-2 text-sm text-gray-700">{{ letter }}</label>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-3">Оператор</label>
+                <Select 
+                    v-model="filters.user" 
+                    :options="users"
+                    option-label="employer_name_1c"
+                    option-value="id"
+                    placeholder="Выбрать"
+                    show-clear
+                    class="w-full"
+                    @change="onFilterChange"
+                />
+            </div>
+        </div>
     </div>
-  </template>
-  
-  <script>
-  import { mapActions, mapGetters } from 'vuex';
+</template>
 
-  export default {
-    props: {
-        users: {
-            type: Array,
-            required: true,
-        },
+<script setup>
+import { ref, onMounted } from 'vue'
+import { Calendar, Checkbox, Select } from '@danaflex/ui/components'
+
+const props = defineProps({
+    users: {
+        type: Array,
+        required: true,
     },
-    data() {
-      const today = new Date();
-      const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 2);
-      const endOfMonth = today;
+})
 
-      return {
-        filterDates: [
-          startOfMonth.toISOString().split('T')[0], // Форматируем дату в 'YYYY-MM-DD'
-          endOfMonth.toISOString().split('T')[0]
-        ],
-        filters: {
-          letters: ['А','Б','В','Г'],
-          user: null,
-        },
-        letters: ['А','Б','В','Г'],
-        operators: ['Оператор 1', 'Оператор 2', 'Оператор 3'],
-      };
-    },
-    methods: {
-      ...mapActions('statistic', ['updateFilters']),
+const emit = defineEmits(['filtersApplied', 'filterChange'])
 
-      applyFilters() {
-        const updatedFilters = {
-          dates: this.filterDates,
-          letters: this.filters.letters,
-          user: this.filters.user,
-        };
+const today = new Date()
+const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 2)
+const endOfMonth = today
 
-        this.updateFilters(updatedFilters);
+const filterDates = ref([startOfMonth, endOfMonth])
+const filters = ref({
+    letters: ['А', 'Б', 'В', 'Г'],
+    user: null,
+})
+const letters = ref(['А', 'Б', 'В', 'Г'])
 
-        
-        this.$emit('filtersApplied', {
-          dates: this.filterDates,
-        });
-      },
+const applyFilters = () => {
+    const formattedDates = filterDates.value ? [
+        filterDates.value[0]?.toISOString().split('T')[0],
+        filterDates.value[1]?.toISOString().split('T')[0]
+    ] : null
 
-      onFilterChange() {
-        const updatedFilters = {
-          dates: this.filterDates,
-          letters: this.filters.letters,
-          user: this.filters.user,
-        };
+    const updatedFilters = {
+        dates: formattedDates,
+        letters: filters.value.letters,
+        user: filters.value.user,
+    }
 
-        this.updateFilters(updatedFilters);
-        
-        this.$emit('filter-change', {
-          filters: this.filters,
-        });
-      },
-    },
+    emit('filtersApplied', updatedFilters)
+    emit('filterChange', { filters: filters.value })
+}
 
-    computed: {
+const onFilterChange = () => {
+    emit('filterChange', { filters: filters.value })
+}
 
-    },
-    mounted() {
-      // Вызываем applyFilters сразу после инициализации компонента
-      this.applyFilters();
-    },
-  };
-  </script>
-  
-  <style scoped>
-  .filters-container {
-    display: flex;
-    width: 100%;
-    flex-direction: column;
-  }
-  
-  .filter-group {
-    margin-bottom: 20px;
-  }
-  
-  .checkbox-group {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-top: 10px;
-  }
-  
-  .operator-select {
-    width: 100%;
-    padding: 8px;
-    font-size: 14px;
-    border-radius: 4px;
-    border: 1px solid #ccc;
-  }
-  
-  .apply-btn {
-    background: #4A9DFF;
-    color: #FFFFFF;
-    width: 100%;
-    padding: 8px 16px 8px 16px;
-    border-radius: 8px;
-    border: none;
-  }
-  
-  .apply-btn:hover {
-    background-color: #0056b3;
-  }
-  </style>
-  
+onMounted(() => {
+    applyFilters()
+})
+</script>

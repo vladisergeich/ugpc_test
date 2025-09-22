@@ -63,16 +63,16 @@ return [
     | Supported: "database", "eloquent"
     |
     */
-
+    
     'providers' => [
         'users' => [
             'driver' => 'keycloak-users',
-            'model' => App\User::class,
+            'model' => App\Models\User::class,
         ],
 
         'keycloak' => [
              'driver' => 'eloquent',
-             'model' => App\User::class,
+             'model' => App\Models\User::class,
          ],
     ],
 
@@ -112,10 +112,5 @@ return [
     */
 
     'password_timeout' => 10800,
-
-    'api' => [
-        'driver' => 'passport',
-        'provider' => 'users',
-    ],
 
 ];

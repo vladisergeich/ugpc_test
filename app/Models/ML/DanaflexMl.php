@@ -7,6 +7,8 @@ use Session;
 
 class DanaflexMl extends Model
 {
+    protected $connection = 'global';
+
     public static function ml($varname,  $baseText='')
     {
         $lnags = ['ru','en','cz']; //поменять на справочник
