@@ -64,10 +64,23 @@
                     </div>
                     <Popover ref="actions">
                         <div class="grid">
-                            <Button label="Добавить простой" variant="text"/>
+                            <Button label="Добавить простой" variant="text" @click="showDownTime = true"/>
                             <Button label="Распределить по выработке" variant="text" @click="showRedistribute = true"/>
                         </div>
                     </Popover>
+                    <Dialog v-model:visible="showDownTime" modal header="Добавление простоя" :style="{ width: '25rem' }">
+                        <div class="grid gap-4">
+                            <Calendar
+                                v-model="downTime.completion_date"
+                                :manualInput="false"
+                                dateFormat="dd.mm.yy"
+                                size="small"
+                                placeholder="Дата простоя"
+                            />
+                            <InputText v-model="downTime.note" size="small" placeholder="Комментарий" />
+                            <Button label="Добавить" variant="text" @click="addDownTime"/>
+                        </div>
+                    </Dialog>
                     <Dialog v-model:visible="showRedistribute" modal header="Распределение по выработке" :style="{ width: '50%' }">
                         <div class="grid gap-4">
                             <Calendar 
@@ -349,7 +362,12 @@ const showRedistribute = ref(false);
 const orders = ref([]);
 const loading = ref(false);
 
-const selectedDownTine = ref(null);
+
+const showDownTime = ref(false);
+const downTime = ref({
+    completion_date: null,
+    note: '',
+});
 
 const dates = ref([new Date(filters.value.start_date),new Date(filters.value.end_date)] || null); 
 
@@ -493,19 +511,29 @@ const addOrder = (order) => {
     update([order]);
 }
 
-function sendToNav() {
-
+const addDownTime = () => {
     const url = routeZiggy('movementOrder.addDownTime', {}, undefined, Ziggy);
 
-    router.post(url, selectedDownTine.value, {
+    const payload = {
+        ...downTime.value,
+        engraver_id: selectedEngraver.value,
+    };
+
+    if (payload.completion_date) {
+        payload.completion_date = payload.completion_date.toLocaleDateString('sv-SE');
+    }
+
+    router.post(url, payload, {
         onSuccess: () => {
-            toast.add({ severity: 'success', summary: 'Профиль обновлен', life: 3000 });
+            showDownTime.value = false;
+            downTime.value = { completion_date: null, note: '' };
+            toast.add({ severity: 'success', summary: 'Простой добавлен', life: 3000 });
         },
         onError: () => {
-            toast.add({ severity: 'error', summary: 'Ошибка обновлении профиля', life: 3000 });
+            toast.add({ severity: 'error', summary: 'Ошибка добавления простоя', life: 3000 });
         },
     });
-}
+};
 
 
 const redistributeOrders = async () => {
